@@ -1040,6 +1040,8 @@ def get_interaction_score(seq,MSA=True,scorMat='v1'):
         scoring_mat = pandas.read_csv('app_data/AA_interactionV1.csv',sep=',')
     elif scorMat == 'v2':
         scoring_mat = pandas.read_csv('app_data/AA_interactionV2.csv',sep=',')
+    elif scorMat == 'v0':
+        scoring_mat = pandas.read_csv('app_data/AA_interactionV0.csv',sep=',')
     scoring_mat.index = scoring_mat['Residue'].values
     scoring_pre = scoring_mat.drop(labels='Residue',axis=1)
     dash1 = np.transpose(pandas.DataFrame(np.zeros(20)))
