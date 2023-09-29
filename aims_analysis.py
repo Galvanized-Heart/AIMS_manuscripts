@@ -1879,3 +1879,39 @@ def get_plotdefs(clust_show,proj_show,chosen_map1,chosen_map2,leg1,leg2):
 
     return(fig3d,plotloc,plottype,plotem,legends,dattype)
 
+# Need to read in all of the new filtered_contig datasets
+def process_save_10x(datdir,subdir,filename):
+
+    temp_file = pandas.read_csv(datdir+subdir+filename)
+
+    tcrs=[]
+    for i in temp_file['barcode'].drop_duplicates().values:
+        x = temp_file[temp_file['barcode']==i]
+        needA = True; needB = True
+        for j in np.arange(len(x)):
+            y=x.iloc[j]
+            if y['is_cell']:
+                if y['high_confidence']:
+                    if y['productive']:
+                        if y['chain'] == 'TRA':
+                            if needA:
+                                needA = False
+                                tra = y[['v_gene','j_gene','cdr1','cdr2','cdr3']]
+                        if y['chain'] == 'TRB':
+                            if needB:
+                                needB = False
+                                trb = y[['v_gene','j_gene','cdr1','cdr2','cdr3']]
+        if needA:
+            continue
+        elif needB:
+            continue
+        else:
+            tcr_pre = [np.hstack((i,tra.values,trb.values))]
+        
+        tcrs = tcrs+tcr_pre
+        
+    tcr_df = pandas.DataFrame(tcrs,columns=['barcode','trav','traj','cdr1a','cdr2a','cdr3a','trbv','trbj','cdr1b','cdr2b','cdr3b'])
+    # Save the important things
+    tcr_df[['cdr1a','cdr2a','cdr3a','cdr1b','cdr2b','cdr3b']].to_csv(subdir[0:6]+'_tcrs.csv',index=False)
+    tcr_df['barcode'].to_csv(subdir[0:6]+'_barcodes.csv',index=False)
+    tcr_df.to_csv(subdir[0:6]+'_full.csv',index=False)
